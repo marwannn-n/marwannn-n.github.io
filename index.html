@@ -42,21 +42,12 @@
       position: absolute;
       width: min(168px, calc(100vw - 3rem));
       border-radius: 1rem;
-      overflow: hidden;
+      overflow: visible;
       cursor: grab;
       box-shadow: 0 20px 60px rgba(0, 0, 0, 0.7);
-      transition: box-shadow 0.3s ease;
+      transition: box-shadow 0.3s ease, transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1), z-index 0s;
       will-change: transform;
       user-select: none;
-    }
-
-    .pic:active {
-      cursor: grabbing;
-    }
-
-    .pic:hover {
-      box-shadow: 0 30px 80px rgba(0, 0, 0, 0.95);
-      z-index: 100 !important;
     }
 
     .pic img {
@@ -65,6 +56,19 @@
       object-fit: cover;
       display: block;
       pointer-events: none;
+      border-radius: 1rem;
+    }
+
+    .pic:active {
+      cursor: grabbing;
+    }
+
+    /* Pop-out + rotate on hover */
+    .pic:not(.dragging):hover {
+      box-shadow: 0 40px 100px rgba(0, 0, 0, 0.95);
+      z-index: 200 !important;
+      transform: rotate(var(--r)) scale(1.18) !important;
+      animation: popSpin 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) both !important;
     }
 
     .pic-placeholder {
@@ -176,127 +180,7 @@
       transform: translateX(0);
     }
 
-    /* ── Section 2: Snapchat ──────────────────────────────── */
-    #section-snap {
-      width: 100vw;
-      min-height: 100svh;
-      height: 100svh;
-      padding: 1.5rem;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      background: transparent;
-    }
-
-    .snap-card {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 1.25rem;
-      animation: fadeUp 0.7s ease both;
-      width: min(100%, 320px);
-    }
-
-    .snap-ghost {
-      width: 88px;
-      height: 88px;
-      animation: float 3s ease-in-out infinite;
-    }
-
-    .snap-link {
-      display: flex;
-      align-items: center;
-      gap: 0.75rem;
-      background: #FFFC00;
-      color: #000;
-      font-family: 'Outfit', sans-serif;
-      font-weight: 900;
-      font-size: 0.95rem;
-      letter-spacing: 0.03em;
-      text-decoration: none;
-      padding: 0.85rem 1.25rem;
-      border-radius: 99px;
-      transition: transform 0.2s ease, box-shadow 0.2s ease;
-      box-shadow: 0 8px 30px rgba(255, 252, 0, 0.25);
-      width: 100%;
-      justify-content: center;
-    }
-
-    .snap-link:hover {
-      transform: scale(1.06);
-      box-shadow: 0 12px 40px rgba(255, 252, 0, 0.45);
-    }
-
-    .snap-link:active {
-      transform: scale(0.97);
-    }
-
-    .snap-username {
-      color: rgba(255, 255, 255, 0.25);
-      font-size: 0.85rem;
-      letter-spacing: 0.06em;
-    }
-
-    /* ── Animations ───────────────────────────────────────── */
-    @keyframes float {
-
-      0%,
-      100% {
-        transform: translateY(0);
-      }
-
-      50% {
-        transform: translateY(-10px);
-      }
-    }
-
-    @keyframes dropIn {
-      from {
-        opacity: 0;
-        transform: rotate(var(--r)) translateY(-60px) scale(0.8);
-      }
-
-      to {
-        opacity: 1;
-        transform: rotate(var(--r)) translateY(0) scale(1);
-      }
-    }
-
-    @keyframes spin {
-      from {
-        transform: rotate(0deg);
-      }
-
-      to {
-        transform: rotate(360deg);
-      }
-    }
-
-    @keyframes bounce {
-
-      0%,
-      100% {
-        transform: translateX(-50%) translateY(0);
-      }
-
-      50% {
-        transform: translateX(-50%) translateY(6px);
-      }
-    }
-
-    @keyframes fadeUp {
-      from {
-        opacity: 0;
-        transform: translateY(30px);
-      }
-
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
-    }
-
-    /* ── Section 3: Spotify ───────────────────────────────────── */
+    /* ── Section 2: Spotify ───────────────────────────────────── */
     #section-spotify {
       width: 100vw;
       min-height: 100svh;
@@ -331,6 +215,46 @@
       text-transform: uppercase;
     }
 
+    /* ── Animations ───────────────────────────────────────── */
+    @keyframes float {
+      0%, 100% { transform: translateY(0); }
+      50%       { transform: translateY(-10px); }
+    }
+
+    @keyframes dropIn {
+      from {
+        opacity: 0;
+        transform: rotate(var(--r)) translateY(-60px) scale(0.8);
+      }
+      to {
+        opacity: 1;
+        transform: rotate(var(--r)) translateY(0) scale(1);
+      }
+    }
+
+    @keyframes popSpin {
+      0%   { transform: rotate(var(--r)) scale(1); }
+      40%  { transform: rotate(calc(var(--r) + 8deg)) scale(1.22); }
+      70%  { transform: rotate(calc(var(--r) - 4deg)) scale(1.16); }
+      100% { transform: rotate(var(--r)) scale(1.18); }
+    }
+
+    @keyframes spin {
+      from { transform: rotate(0deg); }
+      to   { transform: rotate(360deg); }
+    }
+
+    @keyframes bounce {
+      0%, 100% { transform: translateX(-50%) translateY(0); }
+      50%       { transform: translateX(-50%) translateY(6px); }
+    }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(30px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ── Desktop overrides ────────────────────────────────── */
     @media (min-width: 701px) {
       #section-photos {
         padding: 0;
@@ -364,27 +288,10 @@
         padding: 0.4rem 1rem;
       }
 
-      #section-snap,
       #section-spotify {
         min-height: 100vh;
         height: 100vh;
         padding: 0;
-      }
-
-      .snap-card {
-        gap: 1.8rem;
-        width: auto;
-      }
-
-      .snap-ghost {
-        width: 110px;
-        height: 110px;
-      }
-
-      .snap-link {
-        width: auto;
-        font-size: 1.1rem;
-        padding: 0.9rem 2rem;
       }
 
       .spotify-card {
@@ -403,9 +310,9 @@
 <body>
 
   <!-- ── Music ──────────────────────────────────────────────── -->
-  <audio id="audio" src="music.mp3" loop preload="auto"></audio>
+  <audio id="audio" src="music.mp3" loop preload="auto" autoplay></audio>
   <button id="music-btn" title="Toggle music"><span class="icon-note">🎵</span></button>
-  <div id="play-nudge">click to play</div>
+  <div id="play-nudge">tap to play</div>
 
   <!-- ── Down arrow ─────────────────────────────────────────── -->
   <button id="down-btn" title="Scroll down">↓</button>
@@ -413,31 +320,7 @@
   <!-- ── Section 1: Photos ──────────────────────────────────── -->
   <section id="section-photos"></section>
 
-  <!-- ── Section 2: Snapchat ───────────────────────────────── -->
-  <section id="section-snap" style="scroll-snap-align:start">
-    <div class="snap-card">
-
-      <!-- Snapchat ghost SVG -->
-      <svg class="snap-ghost" viewBox="0 0 24 24" fill="#FFFC00" xmlns="http://www.w3.org/2000/svg">
-        <path
-          d="M12.004 2C8.691 2 6 4.692 6 8.004v3.02c0 .31-.105.61-.298.854l-1.237 1.578a.496.496 0 0 0 .249.782l1.64.447c.13.035.232.13.273.257l.487 1.484c.08.244.32.398.576.375a9.174 9.174 0 0 0 1.106-.178c.36-.083.74.04.98.317.558.643 1.37 1.06 2.228 1.06.857 0 1.67-.417 2.228-1.06.24-.277.62-.4.98-.317.352.08.726.147 1.106.178a.497.497 0 0 0 .576-.375l.487-1.484a.38.38 0 0 1 .273-.257l1.64-.447a.496.496 0 0 0 .249-.782l-1.237-1.578A1.098 1.098 0 0 1 18 11.024V8.004C18 4.692 15.316 2 12.004 2z" />
-      </svg>
-
-      <a class="snap-link" href="https://www.snapchat.com/add/destroymarwan" target="_blank" rel="noopener noreferrer"
-        id="snap-add-btn">
-        <!-- Snapchat icon -->
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor">
-          <path
-            d="M12.004 2C8.691 2 6 4.692 6 8.004v3.02c0 .31-.105.61-.298.854l-1.237 1.578a.496.496 0 0 0 .249.782l1.64.447c.13.035.232.13.273.257l.487 1.484c.08.244.32.398.576.375a9.174 9.174 0 0 0 1.106-.178c.36-.083.74.04.98.317.558.643 1.37 1.06 2.228 1.06.857 0 1.67-.417 2.228-1.06.24-.277.62-.4.98-.317.352.08.726.147 1.106.178a.497.497 0 0 0 .576-.375l.487-1.484a.38.38 0 0 1 .273-.257l1.64-.447a.496.496 0 0 0 .249-.782l-1.237-1.578A1.098 1.098 0 0 1 18 11.024V8.004C18 4.692 15.316 2 12.004 2z" />
-        </svg>
-        Add me on Snapchat
-      </a>
-
-      <span class="snap-username">@destroymarwan</span>
-    </div>
-  </section>
-
-  <!-- ── Section 3: Spotify ────────────────────────────────── -->
+  <!-- ── Section 2: Spotify ────────────────────────────────── -->
   <section id="section-spotify">
     <div class="spotify-card">
       <iframe src="https://open.spotify.com/embed/playlist/5mGzD29yy5kX3ekQ2tw6I2?utm_source=generator&theme=0"
@@ -461,6 +344,7 @@
     window.addEventListener('pageshow', () => {
       window.scrollTo(0, 0);
     });
+
     /* ── Music ──────────────────────────────────────────────── */
     const audio = document.getElementById('audio');
     const musicBtn = document.getElementById('music-btn');
@@ -473,22 +357,25 @@
       musicBtn.querySelector('.icon-note').textContent = val ? '🔊' : '🎵';
     }
 
+    // Try to play immediately; show nudge only if browser blocks it
     audio.play().then(() => setPlaying(true)).catch(() => {
       nudge.classList.add('show');
-      setTimeout(() => nudge.classList.remove('show'), 4000);
     });
 
     musicBtn.addEventListener('click', () => {
+      nudge.classList.remove('show');
       if (playing) { audio.pause(); setPlaying(false); }
-      else { audio.play(); setPlaying(true); nudge.classList.remove('show'); }
+      else { audio.play(); setPlaying(true); }
     });
 
+    // First interaction anywhere will also unlock audio
     document.addEventListener('click', () => {
-      if (!playing) audio.play().then(() => setPlaying(true)).catch(() => { });
+      nudge.classList.remove('show');
+      if (!playing) audio.play().then(() => setPlaying(true)).catch(() => {});
     }, { once: true });
 
-    /* ── Down button — cycles through sections, flips to ↑ at end ── */
-    const sections = ['section-photos', 'section-snap', 'section-spotify'];
+    /* ── Down button — cycles through sections ── */
+    const sections = ['section-photos', 'section-spotify'];
     let currentSection = 0;
     const downBtn = document.getElementById('down-btn');
 
@@ -516,11 +403,7 @@
     function buildSourceCandidates(src) {
       const normalized = src.startsWith('./') ? src : `./${src}`;
       const match = normalized.match(/^(.*)\.(jpe?g|png|webp|gif)$/i);
-
-      if (!match) {
-        return [normalized];
-      }
-
+      if (!match) return [normalized];
       const [, base] = match;
       return [
         normalized,
@@ -529,39 +412,26 @@
         `${base}.png`,
         `${base}.webp`,
         `${base}.gif`,
-      ].filter((candidate, index, list) => list.indexOf(candidate) === index);
+      ].filter((c, i, a) => a.indexOf(c) === i);
     }
 
     function loadPhotoWithFallback(img, sources, onFail) {
       let index = 0;
-
       function tryNext() {
-        if (index >= sources.length) {
-          onFail();
-          return;
-        }
-
-        img.src = sources[index];
-        index += 1;
+        if (index >= sources.length) { onFail(); return; }
+        img.src = sources[index++];
       }
-
       img.onerror = tryNext;
-      img.onload = () => {
-        img.onerror = null;
-      };
-
+      img.onload  = () => { img.onerror = null; };
       tryNext();
     }
 
     function rand(min, max) { return min + Math.random() * (max - min); }
-
-    function clamp(value, min, max) {
-      return Math.min(Math.max(value, min), max);
-    }
+    function clamp(value, min, max) { return Math.min(Math.max(value, min), max); }
 
     function getCardMetrics() {
       const mobile = window.innerWidth <= 700;
-      const width = Math.min(mobile ? 168 : 320, window.innerWidth - (mobile ? 48 : 32));
+      const width  = Math.min(mobile ? 168 : 320, window.innerWidth - (mobile ? 48 : 32));
       const height = width * (mobile ? 1.25 : 0.75);
       return { width, height, mobile };
     }
@@ -571,27 +441,26 @@
       const H = window.innerHeight;
       const { width, height, mobile } = getCardMetrics();
       const horizontalMargin = mobile ? 28 : 60;
-      const verticalMargin = mobile ? 92 : 60;
-      const bottomPadding = mobile ? 120 : 140;
+      const verticalMargin   = mobile ? 92 : 60;
+      const bottomPadding    = mobile ? 120 : 140;
       const photoCount = PHOTOS.length;
 
       if (photoCount === 1) {
         const centeredX = Math.max(horizontalMargin, (W - width) / 2);
-        const availableTop = verticalMargin;
+        const availableTop    = verticalMargin;
         const availableBottom = H - bottomPadding;
         const centeredY = clamp(
           ((availableTop + availableBottom - height) / 2) - 42,
           availableTop,
           availableBottom - height
         );
-
         return [{ x: centeredX, y: centeredY }];
       }
 
       if (mobile) {
-        const stackedGap = 22;
-        const centeredX = Math.max(horizontalMargin, (W - width) / 2);
-        const availableTop = verticalMargin;
+        const stackedGap  = 22;
+        const centeredX   = Math.max(horizontalMargin, (W - width) / 2);
+        const availableTop    = verticalMargin;
         const availableBottom = H - bottomPadding;
         const totalHeight = (photoCount * height) + ((photoCount - 1) * stackedGap);
         const startY = clamp(
@@ -599,56 +468,66 @@
           availableTop,
           Math.max(availableTop, availableBottom - totalHeight)
         );
-
-        return PHOTOS.map((_, index) => ({
-          x: centeredX,
-          y: startY + (index * (height + stackedGap))
-        }));
+        return PHOTOS.map((_, i) => ({ x: centeredX, y: startY + (i * (height + stackedGap)) }));
       }
 
-      const mid = W / 2;
-      const leftMin = horizontalMargin;
-      const leftMax = Math.max(leftMin, mid - width - 40);
+      const mid      = W / 2;
+      const leftMin  = horizontalMargin;
+      const leftMax  = Math.max(leftMin, mid - width - 40);
       const rightMin = Math.min(Math.max(horizontalMargin, mid + 40), Math.max(horizontalMargin, W - width - horizontalMargin));
       const rightMax = Math.max(rightMin, W - width - horizontalMargin);
-      const topMin = verticalMargin;
-      const topMax = Math.max(topMin, H - height - bottomPadding);
+      const topMin   = verticalMargin;
+      const topMax   = Math.max(topMin, H - height - bottomPadding);
 
       return [
-        { x: rand(leftMin, leftMax), y: rand(topMin, topMax) },
+        { x: rand(leftMin,  leftMax),  y: rand(topMin, topMax) },
         { x: rand(rightMin, rightMax), y: rand(topMin, topMax) }
       ];
     }
 
-    /* ── Drag ───────────────────────────────────────────────── */
+    /* ── Drag (mouse + touch) ───────────────────────────────── */
     let dragEl = null, dragOffX = 0, dragOffY = 0, zTop = 10;
     const cards = [];
 
     document.addEventListener('mousemove', e => {
       if (!dragEl) return;
       dragEl.style.left = e.clientX - dragOffX + 'px';
-      dragEl.style.top = e.clientY - dragOffY + 'px';
+      dragEl.style.top  = e.clientY - dragOffY + 'px';
     });
     document.addEventListener('mouseup', () => {
       if (!dragEl) return;
+      dragEl.classList.remove('dragging');
+      dragEl.style.boxShadow = '0 20px 60px rgba(0,0,0,0.7)';
+      dragEl = null;
+    });
+
+    document.addEventListener('touchmove', e => {
+      if (!dragEl) return;
+      e.preventDefault();
+      const t = e.touches[0];
+      dragEl.style.left = t.clientX - dragOffX + 'px';
+      dragEl.style.top  = t.clientY - dragOffY + 'px';
+    }, { passive: false });
+    document.addEventListener('touchend', () => {
+      if (!dragEl) return;
+      dragEl.classList.remove('dragging');
       dragEl.style.boxShadow = '0 20px 60px rgba(0,0,0,0.7)';
       dragEl = null;
     });
 
     function layoutCards() {
       const positions = placeCards();
-
       cards.forEach((card, i) => {
         const rot = Number(card.dataset.rotation || 0);
         const pos = positions[i];
-        card.style.left = pos.x + 'px';
-        card.style.top = pos.y + 'px';
+        card.style.left      = pos.x + 'px';
+        card.style.top       = pos.y + 'px';
         card.style.transform = `rotate(${rot}deg)`;
       });
     }
 
     /* ── Render ─────────────────────────────────────────────── */
-    const section = document.getElementById('section-photos');
+    const section   = document.getElementById('section-photos');
     const positions = placeCards();
 
     PHOTOS.forEach((photo, i) => {
@@ -659,34 +538,49 @@
       card.className = 'pic';
       card.style.setProperty('--r', rot + 'deg');
       card.dataset.rotation = rot;
-      card.style.left = pos.x + 'px';
-      card.style.top = pos.y + 'px';
-      card.style.transform = `rotate(${rot}deg)`;
-      card.style.zIndex = i + 1;
-      card.style.animation = `dropIn 0.5s ${i * 0.12}s cubic-bezier(0.175,0.885,0.32,1.275) both`;
+      card.style.left       = pos.x + 'px';
+      card.style.top        = pos.y + 'px';
+      card.style.transform  = `rotate(${rot}deg)`;
+      card.style.zIndex     = i + 1;
+      card.style.animation  = `dropIn 0.5s ${i * 0.12}s cubic-bezier(0.175,0.885,0.32,1.275) both`;
 
       const img = document.createElement('img');
-      img.alt = '';
+      img.alt      = '';
       img.draggable = false;
       loadPhotoWithFallback(img, buildSourceCandidates(photo.src), () => {
         card.innerHTML = '';
         const ph = document.createElement('div');
-        ph.className = 'pic-placeholder';
+        ph.className   = 'pic-placeholder';
         ph.textContent = photo.emoji;
         card.appendChild(ph);
       });
       card.appendChild(img);
 
+      // Mouse drag
       card.addEventListener('mousedown', e => {
         e.preventDefault();
         dragEl = card;
+        card.classList.add('dragging');
         const rect = card.getBoundingClientRect();
         dragOffX = e.clientX - rect.left;
         dragOffY = e.clientY - rect.top;
         zTop++;
-        card.style.zIndex = zTop;
-        card.style.boxShadow = '0 40px 100px rgba(0,0,0,0.95)';
+        card.style.zIndex     = zTop;
+        card.style.boxShadow  = '0 40px 100px rgba(0,0,0,0.95)';
       });
+
+      // Touch drag
+      card.addEventListener('touchstart', e => {
+        e.preventDefault();
+        dragEl = card;
+        card.classList.add('dragging');
+        const rect = card.getBoundingClientRect();
+        dragOffX = e.touches[0].clientX - rect.left;
+        dragOffY = e.touches[0].clientY - rect.top;
+        zTop++;
+        card.style.zIndex    = zTop;
+        card.style.boxShadow = '0 40px 100px rgba(0,0,0,0.95)';
+      }, { passive: false });
 
       section.appendChild(card);
       cards.push(card);
