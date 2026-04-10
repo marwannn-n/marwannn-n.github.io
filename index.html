@@ -67,8 +67,7 @@
     .pic:not(.dragging):hover {
       box-shadow: 0 40px 100px rgba(0, 0, 0, 0.95);
       z-index: 200 !important;
-      transform: rotate(var(--r)) scale(1.18) !important;
-      animation: popSpin 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) both !important;
+      animation: popSpin 5s cubic-bezier(0.34, 1.56, 0.64, 1) both !important;
     }
 
     .pic-placeholder {
@@ -153,33 +152,6 @@
       display: inline-block;
     }
 
-    /* ── "tap to play" nudge ──────────────────────────────── */
-    #play-nudge {
-      position: fixed;
-      top: 1rem;
-      right: 4.25rem;
-      z-index: 997;
-      background: rgba(255, 255, 255, 0.08);
-      border: 1px solid rgba(255, 255, 255, 0.12);
-      border-radius: 99px;
-      padding: 0.35rem 0.8rem;
-      color: rgba(255, 255, 255, 0.4);
-      font-size: 0.75rem;
-      font-weight: 900;
-      letter-spacing: 0.08em;
-      text-transform: uppercase;
-      backdrop-filter: blur(8px);
-      opacity: 0;
-      transform: translateX(10px);
-      transition: opacity 0.4s, transform 0.4s;
-      pointer-events: none;
-    }
-
-    #play-nudge.show {
-      opacity: 1;
-      transform: translateX(0);
-    }
-
     /* ── Section 2: Spotify ───────────────────────────────────── */
     #section-spotify {
       width: 100vw;
@@ -217,41 +189,71 @@
 
     /* ── Animations ───────────────────────────────────────── */
     @keyframes float {
-      0%, 100% { transform: translateY(0); }
-      50%       { transform: translateY(-10px); }
+
+      0%,
+      100% {
+        transform: translateY(0);
+      }
+
+      50% {
+        transform: translateY(-10px);
+      }
     }
 
     @keyframes dropIn {
       from {
         opacity: 0;
-        transform: rotate(var(--r)) translateY(-60px) scale(0.8);
+        transform: rotate(var(--r)) translateY(-60px) scale(0);
       }
+
       to {
         opacity: 1;
-        transform: rotate(var(--r)) translateY(0) scale(1);
+        transform: rotate(var(--r)) translateY(0) scale(0.05);
       }
     }
 
     @keyframes popSpin {
-      0%   { transform: rotate(var(--r)) scale(1); }
-      40%  { transform: rotate(calc(var(--r) + 8deg)) scale(1.22); }
-      70%  { transform: rotate(calc(var(--r) - 4deg)) scale(1.16); }
-      100% { transform: rotate(var(--r)) scale(1.18); }
+      0% {
+        transform: rotate(var(--r)) scale(0.05);
+      }
+
+      100% {
+        transform: rotate(calc(var(--r) + 1080deg)) scale(1.18);
+      }
     }
 
     @keyframes spin {
-      from { transform: rotate(0deg); }
-      to   { transform: rotate(360deg); }
+      from {
+        transform: rotate(0deg);
+      }
+
+      to {
+        transform: rotate(360deg);
+      }
     }
 
     @keyframes bounce {
-      0%, 100% { transform: translateX(-50%) translateY(0); }
-      50%       { transform: translateX(-50%) translateY(6px); }
+
+      0%,
+      100% {
+        transform: translateX(-50%) translateY(0);
+      }
+
+      50% {
+        transform: translateX(-50%) translateY(6px);
+      }
     }
 
     @keyframes fadeUp {
-      from { opacity: 0; transform: translateY(30px); }
-      to   { opacity: 1; transform: translateY(0); }
+      from {
+        opacity: 0;
+        transform: translateY(30px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
     }
 
     /* ── Desktop overrides ────────────────────────────────── */
@@ -310,9 +312,8 @@
 <body>
 
   <!-- ── Music ──────────────────────────────────────────────── -->
-  <audio id="audio" src="music.mp3" loop preload="auto" autoplay></audio>
+  <audio id="audio" src="olympan.mp3" loop preload="auto" autoplay></audio>
   <button id="music-btn" title="Toggle music"><span class="icon-note">🎵</span></button>
-  <div id="play-nudge">tap to play</div>
 
   <!-- ── Down arrow ─────────────────────────────────────────── -->
   <button id="down-btn" title="Scroll down">↓</button>
@@ -348,7 +349,6 @@
     /* ── Music ──────────────────────────────────────────────── */
     const audio = document.getElementById('audio');
     const musicBtn = document.getElementById('music-btn');
-    const nudge = document.getElementById('play-nudge');
     let playing = false;
 
     function setPlaying(val) {
@@ -357,20 +357,16 @@
       musicBtn.querySelector('.icon-note').textContent = val ? '🔊' : '🎵';
     }
 
-    // Try to play immediately; show nudge only if browser blocks it
-    audio.play().then(() => setPlaying(true)).catch(() => {
-      nudge.classList.add('show');
-    });
+    // Try to play immediately; start on first interaction if browser blocks it
+    audio.play().then(() => setPlaying(true)).catch(() => {});
 
     musicBtn.addEventListener('click', () => {
-      nudge.classList.remove('show');
       if (playing) { audio.pause(); setPlaying(false); }
-      else { audio.play(); setPlaying(true); }
+      else { audio.play().then(() => setPlaying(true)); }
     });
 
-    // First interaction anywhere will also unlock audio
+    // Unlock audio on first tap/click anywhere
     document.addEventListener('click', () => {
-      nudge.classList.remove('show');
       if (!playing) audio.play().then(() => setPlaying(true)).catch(() => {});
     }, { once: true });
 
@@ -397,7 +393,7 @@
 
     /* ── Photos ─────────────────────────────────────────────── */
     const PHOTOS = [
-      { src: './pic1.jpeg', emoji: '😎' },
+      { src: './me.jpg', emoji: '😎' },
     ];
 
     function buildSourceCandidates(src) {
@@ -422,7 +418,7 @@
         img.src = sources[index++];
       }
       img.onerror = tryNext;
-      img.onload  = () => { img.onerror = null; };
+      img.onload = () => { img.onerror = null; };
       tryNext();
     }
 
@@ -431,7 +427,7 @@
 
     function getCardMetrics() {
       const mobile = window.innerWidth <= 700;
-      const width  = Math.min(mobile ? 168 : 320, window.innerWidth - (mobile ? 48 : 32));
+      const width = Math.min(mobile ? 168 : 320, window.innerWidth - (mobile ? 48 : 32));
       const height = width * (mobile ? 1.25 : 0.75);
       return { width, height, mobile };
     }
@@ -441,13 +437,13 @@
       const H = window.innerHeight;
       const { width, height, mobile } = getCardMetrics();
       const horizontalMargin = mobile ? 28 : 60;
-      const verticalMargin   = mobile ? 92 : 60;
-      const bottomPadding    = mobile ? 120 : 140;
+      const verticalMargin = mobile ? 92 : 60;
+      const bottomPadding = mobile ? 120 : 140;
       const photoCount = PHOTOS.length;
 
       if (photoCount === 1) {
         const centeredX = Math.max(horizontalMargin, (W - width) / 2);
-        const availableTop    = verticalMargin;
+        const availableTop = verticalMargin;
         const availableBottom = H - bottomPadding;
         const centeredY = clamp(
           ((availableTop + availableBottom - height) / 2) - 42,
@@ -458,9 +454,9 @@
       }
 
       if (mobile) {
-        const stackedGap  = 22;
-        const centeredX   = Math.max(horizontalMargin, (W - width) / 2);
-        const availableTop    = verticalMargin;
+        const stackedGap = 22;
+        const centeredX = Math.max(horizontalMargin, (W - width) / 2);
+        const availableTop = verticalMargin;
         const availableBottom = H - bottomPadding;
         const totalHeight = (photoCount * height) + ((photoCount - 1) * stackedGap);
         const startY = clamp(
@@ -471,16 +467,16 @@
         return PHOTOS.map((_, i) => ({ x: centeredX, y: startY + (i * (height + stackedGap)) }));
       }
 
-      const mid      = W / 2;
-      const leftMin  = horizontalMargin;
-      const leftMax  = Math.max(leftMin, mid - width - 40);
+      const mid = W / 2;
+      const leftMin = horizontalMargin;
+      const leftMax = Math.max(leftMin, mid - width - 40);
       const rightMin = Math.min(Math.max(horizontalMargin, mid + 40), Math.max(horizontalMargin, W - width - horizontalMargin));
       const rightMax = Math.max(rightMin, W - width - horizontalMargin);
-      const topMin   = verticalMargin;
-      const topMax   = Math.max(topMin, H - height - bottomPadding);
+      const topMin = verticalMargin;
+      const topMax = Math.max(topMin, H - height - bottomPadding);
 
       return [
-        { x: rand(leftMin,  leftMax),  y: rand(topMin, topMax) },
+        { x: rand(leftMin, leftMax), y: rand(topMin, topMax) },
         { x: rand(rightMin, rightMax), y: rand(topMin, topMax) }
       ];
     }
@@ -492,7 +488,7 @@
     document.addEventListener('mousemove', e => {
       if (!dragEl) return;
       dragEl.style.left = e.clientX - dragOffX + 'px';
-      dragEl.style.top  = e.clientY - dragOffY + 'px';
+      dragEl.style.top = e.clientY - dragOffY + 'px';
     });
     document.addEventListener('mouseup', () => {
       if (!dragEl) return;
@@ -506,7 +502,7 @@
       e.preventDefault();
       const t = e.touches[0];
       dragEl.style.left = t.clientX - dragOffX + 'px';
-      dragEl.style.top  = t.clientY - dragOffY + 'px';
+      dragEl.style.top = t.clientY - dragOffY + 'px';
     }, { passive: false });
     document.addEventListener('touchend', () => {
       if (!dragEl) return;
@@ -520,14 +516,14 @@
       cards.forEach((card, i) => {
         const rot = Number(card.dataset.rotation || 0);
         const pos = positions[i];
-        card.style.left      = pos.x + 'px';
-        card.style.top       = pos.y + 'px';
+        card.style.left = pos.x + 'px';
+        card.style.top = pos.y + 'px';
         card.style.transform = `rotate(${rot}deg)`;
       });
     }
 
     /* ── Render ─────────────────────────────────────────────── */
-    const section   = document.getElementById('section-photos');
+    const section = document.getElementById('section-photos');
     const positions = placeCards();
 
     PHOTOS.forEach((photo, i) => {
@@ -538,19 +534,19 @@
       card.className = 'pic';
       card.style.setProperty('--r', rot + 'deg');
       card.dataset.rotation = rot;
-      card.style.left       = pos.x + 'px';
-      card.style.top        = pos.y + 'px';
-      card.style.transform  = `rotate(${rot}deg)`;
-      card.style.zIndex     = i + 1;
-      card.style.animation  = `dropIn 0.5s ${i * 0.12}s cubic-bezier(0.175,0.885,0.32,1.275) both`;
+      card.style.left = pos.x + 'px';
+      card.style.top = pos.y + 'px';
+      card.style.transform = `rotate(${rot}deg)`;
+      card.style.zIndex = i + 1;
+      card.style.animation = `dropIn 0.5s ${i * 0.12}s cubic-bezier(0.175,0.885,0.32,1.275) both, popSpin 5s ${0.5 + i * 0.12}s cubic-bezier(0.34, 1.56, 0.64, 1) both`;
 
       const img = document.createElement('img');
-      img.alt      = '';
+      img.alt = '';
       img.draggable = false;
       loadPhotoWithFallback(img, buildSourceCandidates(photo.src), () => {
         card.innerHTML = '';
         const ph = document.createElement('div');
-        ph.className   = 'pic-placeholder';
+        ph.className = 'pic-placeholder';
         ph.textContent = photo.emoji;
         card.appendChild(ph);
       });
@@ -565,8 +561,8 @@
         dragOffX = e.clientX - rect.left;
         dragOffY = e.clientY - rect.top;
         zTop++;
-        card.style.zIndex     = zTop;
-        card.style.boxShadow  = '0 40px 100px rgba(0,0,0,0.95)';
+        card.style.zIndex = zTop;
+        card.style.boxShadow = '0 40px 100px rgba(0,0,0,0.95)';
       });
 
       // Touch drag
@@ -578,7 +574,7 @@
         dragOffX = e.touches[0].clientX - rect.left;
         dragOffY = e.touches[0].clientY - rect.top;
         zTop++;
-        card.style.zIndex    = zTop;
+        card.style.zIndex = zTop;
         card.style.boxShadow = '0 40px 100px rgba(0,0,0,0.95)';
       }, { passive: false });
 
